@@ -3,6 +3,10 @@ import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import RiskGauge from '../components/RiskGauge'
 import EvidenceCard from '../components/EvidenceCard'
+import SupplyChainGraph from '../components/SupplyChainGraph'
+import GhostShiftReport from '../components/GhostShiftReport'
+import IPFingerprintDashboard from '../components/IPFingerprintDashboard'
+import FactoryIntelTimeline from '../components/FactoryIntelTimeline'
 
 const ACTION_COLORS = {
   'Report': { color: '#ef4444', bg: 'bg-risk-high/10', border: 'border-risk-high/20', text: 'text-risk-high' },
@@ -173,6 +177,39 @@ export default function Dossier() {
           </div>
         </motion.div>
       )}
+
+      {/* Intelligence Modules */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
+        className="mb-10"
+      >
+        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          Deep Intelligence Analysis
+        </h2>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Ghost Shift Probability */}
+          <GhostShiftReport brand={data.brand} product={data.product} />
+
+          {/* Supply Chain Graph */}
+          <SupplyChainGraph brand={data.brand} product={data.product} />
+        </div>
+
+        {/* IP Fingerprint */}
+        <div className="mt-6">
+          <IPFingerprintDashboard brand={data.brand} product={data.product} />
+        </div>
+
+        {/* Factory Intelligence */}
+        <div className="mt-6">
+          <FactoryIntelTimeline brand={data.brand} product={data.product} />
+        </div>
+      </motion.div>
 
       {/* Action Buttons */}
       <motion.div
