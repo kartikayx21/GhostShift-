@@ -1,0 +1,114 @@
+{
+  "scenario_name": "The Copycat Supplier",
+  "probability": 58,
+  "factory": {
+    "name": "Shenzhen NovaTech Manufacturing",
+    "location": "Shenzhen, Guangdong, China",
+    "declared_capacity": 20000,
+    "estimated_actual_output": 28000,
+    "suspicion_score": 0.58,
+    "registered_products": ["wireless earbuds", "bluetooth speakers"],
+    "facility_code": "SZ-NT-07"
+  },
+  "component_overlap": {
+    "chip_id": "QCC3046",
+    "chip_supplier": "Shenzhen HuaQiang Electronics Co.",
+    "genuine_buyer": "Samsung Electronics",
+    "suspicious_buyers": [
+      {"name": "Shenzhen NovaTech Manufacturing", "purchase_volume": 6000, "first_order": "2026-01-20"}
+    ],
+    "overlap_components": 3,
+    "total_components": 5
+  },
+  "listings": [
+    {
+      "id": "listing_cs_001", "title": "Galaxy Buds 3 Pro - Best Quality",
+      "platform": "AliExpress", "price": 62.50, "genuine_price": 229.99,
+      "seller": "ShenzhenAudioDirect", "seller_rating": 4.0,
+      "monthly_sales": 1540, "serial_prefix": "RFSM",
+      "image_url": "https://placeholder.pics/svg/300/1a1a1a/8b5cf6/Buds%20Front",
+      "suspicious": true, "flags": ["component_overlap", "price_anomaly"]
+    },
+    {
+      "id": "listing_cs_002", "title": "Samsung Buds Compatible - Premium Sound",
+      "platform": "DHgate", "price": 55.00, "genuine_price": 229.99,
+      "seller": "AudioTechWholesale", "seller_rating": 3.6,
+      "monthly_sales": 890, "serial_prefix": "RFSK",
+      "image_url": "https://placeholder.pics/svg/300/1a1a1a/f59e0b/Buds%20Side",
+      "suspicious": true, "flags": ["background_packaging_visible"]
+    }
+  ],
+  "serial_analysis": {
+    "genuine_pattern": "^RF[A-Z]{2}[0-9]{6}$",
+    "checksum_algorithm": "mod97",
+    "year_encoding": "pos5-6",
+    "facility_encoding": "pos3-4",
+    "counterfeit_batches": [
+      {
+        "prefix": "RFSM",
+        "count": 23,
+        "pattern": "semi_sequential",
+        "verdict": "Partial batch — some sequential, some random. Possible mixed genuine/counterfeit inventory."
+      }
+    ]
+  },
+  "employee_movements": [
+    {
+      "name": "Chen Jie", "role": "Audio Engineering Lead",
+      "previous_employer": "Samsung SDI (Shenzhen Audio Division)",
+      "current_employer": "Shenzhen NovaTech Manufacturing",
+      "transfer_date": "2026-03-10", "months_since_transfer": 2,
+      "previous_role": "Senior Audio Engineer - Galaxy Buds",
+      "risk_signal": "Same role + same product category",
+      "risk_weight": 0.75
+    }
+  ],
+  "job_postings": [
+    {
+      "title": "Assembly Workers (200+ positions) - Audio Electronics",
+      "company": "Shenzhen NovaTech Manufacturing", "location": "Shenzhen, China",
+      "posted_date": "2026-04-20",
+      "red_flags": ["hiring_spike_340_percent", "flexible_hours", "audio_electronics"],
+      "description": "Immediate hiring for assembly line workers. Experience in wireless audio device assembly preferred. Flexible shift arrangements available."
+    }
+  ],
+  "forensic_analysis": {
+    "images_analyzed": 2,
+    "total_flags": 4,
+    "high_confidence_flags": 2,
+    "findings": [
+      {"type": "background_match", "description": "Background shows genuine Samsung packaging boxes stacked", "confidence": 0.84},
+      {"type": "logo_inconsistency", "description": "Samsung logo weight slightly thinner than genuine", "confidence": 0.72},
+      {"type": "material_quality", "description": "Matte finish slightly more reflective than authentic", "confidence": 0.55},
+      {"type": "packaging_anomaly", "description": "Seal sticker alignment off by 1.2mm", "confidence": 0.68}
+    ]
+  },
+  "pricing_analysis": {
+    "genuine_price": 229.99,
+    "average_listing_price": 58.75,
+    "price_ratio": 0.26,
+    "estimated_bom_cost": 48.00,
+    "below_bom": false,
+    "threshold": "red",
+    "geographic_adjustment": 0.88
+  },
+  "supply_chain_graph": {
+    "nodes": [
+      {"id": "samsung", "type": "brand", "name": "Samsung Electronics", "status": "verified", "color": "green"},
+      {"id": "huaqiang", "type": "supplier", "name": "HuaQiang Electronics", "status": "verified", "color": "green"},
+      {"id": "novatech", "type": "factory", "name": "NovaTech Manufacturing", "status": "suspicious", "color": "yellow"},
+      {"id": "galaxy_buds", "type": "product", "name": "Galaxy Buds 3 Pro", "status": "genuine", "color": "green"},
+      {"id": "listing_cs_001", "type": "listing", "name": "AliExpress Listing", "status": "suspicious", "color": "yellow"},
+      {"id": "listing_cs_002", "type": "listing", "name": "DHgate Listing", "status": "suspicious", "color": "yellow"},
+      {"id": "chen_jie", "type": "employee", "name": "Chen Jie (Ex-Samsung)", "status": "suspicious", "color": "yellow"}
+    ],
+    "edges": [
+      {"from": "huaqiang", "to": "samsung", "relation": "SUPPLIES_TO", "label": "QCC3046"},
+      {"from": "huaqiang", "to": "novatech", "relation": "ALSO_SUPPLIES", "label": "QCC3046", "suspicious": true},
+      {"from": "novatech", "to": "listing_cs_001", "relation": "LIKELY_SOURCE", "suspicious": true},
+      {"from": "novatech", "to": "listing_cs_002", "relation": "LIKELY_SOURCE", "suspicious": true},
+      {"from": "chen_jie", "to": "novatech", "relation": "EMPLOYED_BY", "suspicious": true},
+      {"from": "samsung", "to": "galaxy_buds", "relation": "MANUFACTURES"}
+    ]
+  }
+}

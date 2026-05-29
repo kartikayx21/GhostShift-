@@ -1,0 +1,154 @@
+{
+  "scenario_name": "The Ghost Shift",
+  "probability": 73,
+  "factory": {
+    "name": "Dongguan TechParts Ltd.",
+    "location": "Dongguan, Guangdong, China",
+    "declared_capacity": 15000,
+    "estimated_actual_output": 38000,
+    "suspicion_score": 0.73,
+    "registered_products": ["consumer electronics", "IoT devices"],
+    "facility_code": "DG-TP-04"
+  },
+  "component_overlap": {
+    "chip_id": "STM32F103C8T6",
+    "chip_supplier": "Zhongshan ChipDesign Semiconductor",
+    "genuine_buyer": "Apple Inc.",
+    "suspicious_buyers": [
+      {"name": "YuXin Technology Ltd.", "purchase_volume": 12000, "first_order": "2026-02-14"},
+      {"name": "Dongguan TechParts Ltd.", "purchase_volume": 8500, "first_order": "2026-03-01"}
+    ],
+    "overlap_components": 4,
+    "total_components": 5
+  },
+  "listings": [
+    {
+      "id": "listing_001", "title": "AirPods Pro 2 Original Quality - Factory Direct",
+      "platform": "AliExpress", "price": 45.99, "genuine_price": 249.99,
+      "seller": "ShenZhen TopTech Store", "seller_rating": 4.2,
+      "monthly_sales": 2847, "serial_prefix": "FHTQ3",
+      "image_url": "https://placeholder.pics/svg/300/1a1a1a/6366f1/AirPods%20Front",
+      "suspicious": true, "flags": ["price_below_bom", "sequential_serials"]
+    },
+    {
+      "id": "listing_002", "title": "Genuine AirPods Pro Wholesale x50 Units",
+      "platform": "DHgate", "price": 38.50, "genuine_price": 249.99,
+      "seller": "GuangzhouElectronicsCo", "seller_rating": 3.8,
+      "monthly_sales": 1203, "serial_prefix": "FHTQ3",
+      "image_url": "https://placeholder.pics/svg/300/1a1a1a/ef4444/AirPods%20Bulk",
+      "suspicious": true, "flags": ["same_serial_prefix", "bulk_below_cost"]
+    },
+    {
+      "id": "listing_003", "title": "AirPods Pro 1:1 Premium AAA+ Copy",
+      "platform": "Taobao", "price": 29.99, "genuine_price": 249.99,
+      "seller": "华强北数码旗舰店", "seller_rating": 4.5,
+      "monthly_sales": 4521, "serial_prefix": "FHTQ4",
+      "image_url": "https://placeholder.pics/svg/300/1a1a1a/f59e0b/AirPods%20Copy",
+      "suspicious": true, "flags": ["explicitly_counterfeit", "high_volume"]
+    }
+  ],
+  "serial_analysis": {
+    "genuine_pattern": "^[A-Z]{4}[0-9]{1}[A-Z]{2}[0-9]{4}$",
+    "checksum_algorithm": "luhn_mod10",
+    "year_encoding": "pos5-6",
+    "facility_encoding": "pos1-2",
+    "counterfeit_batches": [
+      {
+        "prefix": "FHTQ3",
+        "count": 47,
+        "pattern": "sequential_increment",
+        "last_digits_range": "0001-0047",
+        "verdict": "Ghost shift batch — sequential numbering indicates single production run"
+      }
+    ]
+  },
+  "employee_movements": [
+    {
+      "name": "Zhang Wei", "role": "Production Line Director",
+      "previous_employer": "Foxconn (Apple Line - Shenzhen)",
+      "current_employer": "Dongguan TechParts Ltd.",
+      "transfer_date": "2026-02-28", "months_since_transfer": 3,
+      "previous_role": "Senior QA Engineer - AirPods Division",
+      "risk_signal": "NDA role to unknown factory in < 6 months",
+      "risk_weight": 0.90
+    },
+    {
+      "name": "Li Xiaoming", "role": "Chief Quality Officer",
+      "previous_employer": "Apple Quality Assurance (Shenzhen)",
+      "current_employer": "YuXin Technology Ltd.",
+      "transfer_date": "2026-01-15", "months_since_transfer": 4,
+      "previous_role": "Quality Standards Manager",
+      "risk_signal": "Same role + same product category",
+      "risk_weight": 0.85
+    }
+  ],
+  "job_postings": [
+    {
+      "title": "Senior AirPods Assembly Line Supervisor",
+      "company": "Dongguan TechParts Ltd.", "location": "Dongguan, China",
+      "posted_date": "2026-05-15",
+      "red_flags": ["night shift premium", "Apple production line experience", "QC processes"],
+      "description": "Experience with Apple AirPods production line required. Night shift availability preferred. Competitive pay + housing."
+    },
+    {
+      "title": "Quality Control Engineer - Consumer Audio",
+      "company": "YuXin Technology Ltd.", "location": "Shenzhen, China",
+      "posted_date": "2026-05-10",
+      "red_flags": ["Apple quality standards", "AirPods internals", "flexible hours"],
+      "description": "Seeking QC engineer familiar with Apple quality standards. Knowledge of AirPods internals required."
+    }
+  ],
+  "forensic_analysis": {
+    "images_analyzed": 3,
+    "total_flags": 7,
+    "high_confidence_flags": 4,
+    "findings": [
+      {"type": "logo_inconsistency", "description": "Logo font kerning differs by 0.3mm", "confidence": 0.91},
+      {"type": "material_quality", "description": "Injection molding parting line visible on casing", "confidence": 0.87},
+      {"type": "packaging_anomaly", "description": "QR code uses deprecated 2025 format", "confidence": 0.78},
+      {"type": "background_match", "description": "Factory layout in photo background matches known Dongguan facility", "confidence": 0.82},
+      {"type": "serial_mismatch", "description": "Serial encodes facility DG-TP but seller claims Shenzhen origin", "confidence": 0.93},
+      {"type": "color_deviation", "description": "White casing shows Pantone deviation of 2.1 units", "confidence": 0.65},
+      {"type": "build_quality", "description": "Screw type differs from genuine (Phillips vs Pentalobe)", "confidence": 0.95}
+    ]
+  },
+  "pricing_analysis": {
+    "genuine_price": 249.99,
+    "average_listing_price": 38.16,
+    "price_ratio": 0.15,
+    "estimated_bom_cost": 62.00,
+    "below_bom": true,
+    "threshold": "red",
+    "geographic_adjustment": 0.92
+  },
+  "supply_chain_graph": {
+    "nodes": [
+      {"id": "apple", "type": "brand", "name": "Apple Inc.", "status": "verified", "color": "green"},
+      {"id": "stm32_supplier", "type": "supplier", "name": "Zhongshan ChipDesign Semi.", "status": "verified", "color": "green"},
+      {"id": "battery_supplier", "type": "supplier", "name": "Dongguan BatteryTech Power", "status": "verified", "color": "green"},
+      {"id": "casing_supplier", "type": "supplier", "name": "Suzhou PrecisionMold Industrial", "status": "verified", "color": "green"},
+      {"id": "airpods_pro", "type": "product", "name": "AirPods Pro 2", "status": "genuine", "color": "green"},
+      {"id": "dongguan_techparts", "type": "factory", "name": "Dongguan TechParts Ltd.", "status": "suspicious", "color": "red"},
+      {"id": "yuxin_tech", "type": "factory", "name": "YuXin Technology Ltd.", "status": "suspicious", "color": "yellow"},
+      {"id": "listing_001", "type": "listing", "name": "AliExpress #001", "status": "counterfeit", "color": "red"},
+      {"id": "listing_002", "type": "listing", "name": "DHgate #002", "status": "counterfeit", "color": "red"},
+      {"id": "listing_003", "type": "listing", "name": "Taobao #003", "status": "counterfeit", "color": "red"},
+      {"id": "zhang_wei", "type": "employee", "name": "Zhang Wei (Ex-Foxconn)", "status": "suspicious", "color": "yellow"},
+      {"id": "li_xiaoming", "type": "employee", "name": "Li Xiaoming (Ex-Apple QA)", "status": "suspicious", "color": "yellow"}
+    ],
+    "edges": [
+      {"from": "stm32_supplier", "to": "apple", "relation": "SUPPLIES_TO", "label": "STM32F103"},
+      {"from": "battery_supplier", "to": "apple", "relation": "SUPPLIES_TO", "label": "Li-Ion Cell"},
+      {"from": "casing_supplier", "to": "apple", "relation": "SUPPLIES_TO", "label": "Casing Mold"},
+      {"from": "stm32_supplier", "to": "dongguan_techparts", "relation": "ALSO_SUPPLIES", "label": "STM32F103", "suspicious": true},
+      {"from": "stm32_supplier", "to": "yuxin_tech", "relation": "ALSO_SUPPLIES", "label": "STM32F103", "suspicious": true},
+      {"from": "battery_supplier", "to": "dongguan_techparts", "relation": "ALSO_SUPPLIES", "label": "Li-Ion Cell", "suspicious": true},
+      {"from": "dongguan_techparts", "to": "listing_001", "relation": "LIKELY_SOURCE", "suspicious": true},
+      {"from": "dongguan_techparts", "to": "listing_002", "relation": "LIKELY_SOURCE", "suspicious": true},
+      {"from": "yuxin_tech", "to": "listing_003", "relation": "LIKELY_SOURCE", "suspicious": true},
+      {"from": "zhang_wei", "to": "dongguan_techparts", "relation": "EMPLOYED_BY", "suspicious": true},
+      {"from": "li_xiaoming", "to": "yuxin_tech", "relation": "EMPLOYED_BY", "suspicious": true},
+      {"from": "apple", "to": "airpods_pro", "relation": "MANUFACTURES"}
+    ]
+  }
+}

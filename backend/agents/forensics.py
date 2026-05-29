@@ -1,7 +1,7 @@
 import asyncio
 from agents.base import BaseAgent
 from services.brightdata import brightdata
-from services.anthropic_client import claude
+from services.ollama_client import llm
 
 
 class ForensicsAgent(BaseAgent):
@@ -22,7 +22,7 @@ class ForensicsAgent(BaseAgent):
         await self.log(f"Analyzing {len(images)} product images with AI vision...")
         await asyncio.sleep(0.5)
 
-        results = await claude.analyze_forensics(images, brand, product)
+        results = await llm.analyze_forensics(images, brand, product)
 
         total_flags = 0
         high_confidence_flags = 0

@@ -1,0 +1,80 @@
+{
+  "scenario_name": "Clean Supplier",
+  "probability": 12,
+  "factory": {
+    "name": "Guangzhou LegitParts Trading Co.",
+    "location": "Guangzhou, Guangdong, China",
+    "declared_capacity": 10000,
+    "estimated_actual_output": 9500,
+    "suspicion_score": 0.12,
+    "registered_products": ["phone accessories", "cases", "screen protectors"],
+    "facility_code": "GZ-LP-02"
+  },
+  "component_overlap": {
+    "chip_id": "N/A",
+    "chip_supplier": "N/A",
+    "genuine_buyer": "Dyson Ltd.",
+    "suspicious_buyers": [],
+    "overlap_components": 0,
+    "total_components": 5
+  },
+  "listings": [
+    {
+      "id": "listing_cl_001", "title": "Dyson V15 Detect - Authorized Reseller",
+      "platform": "AliExpress", "price": 485.00, "genuine_price": 549.99,
+      "seller": "GlobalHomeAppliances", "seller_rating": 4.8,
+      "monthly_sales": 120, "serial_prefix": "SV47",
+      "image_url": "https://placeholder.pics/svg/300/1a1a1a/22c55e/Dyson%20V15",
+      "suspicious": false, "flags": []
+    },
+    {
+      "id": "listing_cl_002", "title": "Genuine Dyson V15 - Grey Market Import",
+      "platform": "DHgate", "price": 510.00, "genuine_price": 549.99,
+      "seller": "AuthorizedImportsCo", "seller_rating": 4.9,
+      "monthly_sales": 45, "serial_prefix": "SV47",
+      "image_url": "https://placeholder.pics/svg/300/1a1a1a/22c55e/Dyson%20Box",
+      "suspicious": false, "flags": []
+    }
+  ],
+  "serial_analysis": {
+    "genuine_pattern": "^SV[0-9]{2}-[A-Z]{2}-[0-9]{8}$",
+    "checksum_algorithm": "crc16",
+    "year_encoding": "pos6-7",
+    "facility_encoding": "pos4-5",
+    "counterfeit_batches": []
+  },
+  "employee_movements": [],
+  "job_postings": [],
+  "forensic_analysis": {
+    "images_analyzed": 2,
+    "total_flags": 1,
+    "high_confidence_flags": 0,
+    "findings": [
+      {"type": "packaging_anomaly", "description": "Slight color variation in box — consistent with regional print runs", "confidence": 0.25}
+    ]
+  },
+  "pricing_analysis": {
+    "genuine_price": 549.99,
+    "average_listing_price": 497.50,
+    "price_ratio": 0.90,
+    "estimated_bom_cost": 180.00,
+    "below_bom": false,
+    "threshold": "green",
+    "geographic_adjustment": 0.95
+  },
+  "supply_chain_graph": {
+    "nodes": [
+      {"id": "dyson", "type": "brand", "name": "Dyson Ltd.", "status": "verified", "color": "green"},
+      {"id": "dyson_v15", "type": "product", "name": "Dyson V15 Detect", "status": "genuine", "color": "green"},
+      {"id": "legit_reseller", "type": "factory", "name": "LegitParts Trading", "status": "verified", "color": "green"},
+      {"id": "listing_cl_001", "type": "listing", "name": "AliExpress (Authorized)", "status": "verified", "color": "green"},
+      {"id": "listing_cl_002", "type": "listing", "name": "DHgate (Grey Market)", "status": "verified", "color": "green"}
+    ],
+    "edges": [
+      {"from": "dyson", "to": "dyson_v15", "relation": "MANUFACTURES"},
+      {"from": "dyson", "to": "legit_reseller", "relation": "AUTHORIZED_RESELLER"},
+      {"from": "legit_reseller", "to": "listing_cl_001", "relation": "SELLS_VIA"},
+      {"from": "legit_reseller", "to": "listing_cl_002", "relation": "SELLS_VIA"}
+    ]
+  }
+}

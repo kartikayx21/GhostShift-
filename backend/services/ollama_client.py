@@ -2,21 +2,36 @@ import os
 import json
 import random
 import asyncio
-import anthropic
+import httpx
 
 
-class AnthropicClient:
-    """Client for Claude AI analysis with mock mode fallback."""
+class OllamaClient:
+    """Client for local LLM inference via Ollama with mock mode fallback."""
 
     def __init__(self):
-        self.api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-        self.mock_mode = not bool(self.api_key.strip())
-        self.client = None
-        if not self.mock_mode:
-            self.client = anthropic.Anthropic(api_key=self.api_key)
+        self.host = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+        self.model = os.environ.get("OLLAMA_MODEL", "phi3:mini")
+        # Mock mode when OLLAMA_MOCK=true or when host is unreachable
+        self._force_mock = os.environ.get("OLLAMA_MOCK", "").lower() == "true"
+        self.mock_mode = self._force_mock
+
+    async def _check_connection(self):
+        """Check if Ollama is reachable; switch to mock mode if not."""
+        if self._force_mock:
+            return
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(f"{self.host}/api/tags", timeout=5.0)
+                resp.raise_for_status()
+                self.mock_mode = False
+        except Exception:
+            print(
+                f"[WARN] Ollama not reachable at {self.host} — falling back to mock mode"
+            )
+            self.mock_mode = True
 
     async def analyze(self, system_prompt: str, user_prompt: str) -> str:
-        """General-purpose analysis using Claude."""
+        """General-purpose analysis using Ollama (phi3:mini)."""
         if self.mock_mode:
             await asyncio.sleep(random.uniform(1.0, 2.0))
             return (
@@ -28,13 +43,32 @@ class AnthropicClient:
                 "the scope and scale of potential IP theft."
             )
 
-        message = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=4096,
-            system=system_prompt,
-            messages=[{"role": "user", "content": user_prompt}],
-        )
-        return message.content[0].text
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{self.host}/api/generate",
+                    headers={
+                        "Origin": self.host,
+                        "Host": self.host.replace("http://", "").replace("https://", ""),
+                    },
+                    json={
+                        "model": self.model,
+                        "system": system_prompt,
+                        "prompt": user_prompt,
+                        "stream": False,
+                        "options": {
+                            "temperature": 0.7,
+                            "num_predict": 4096,
+                        },
+                    },
+                    timeout=120.0,
+                )
+                response.raise_for_status()
+                return response.json().get("response", "")
+        except Exception as e:
+            print(f"[WARN] Ollama API call failed: {e} — falling back to mock mode")
+            self.mock_mode = True
+            return await self.analyze(system_prompt, user_prompt)
 
     async def analyze_forensics(
         self, image_descriptions: list[dict], brand: str, product: str
@@ -71,7 +105,7 @@ class AnthropicClient:
                 )
             return results
 
-        # Real mode: construct prompt describing images and ask Claude for analysis
+        # Real mode: construct prompt describing images and ask Ollama for analysis
         image_text = "\n".join(
             [
                 f"Image {i+1}: From {img.get('source_platform', 'unknown')} - "
@@ -91,27 +125,36 @@ class AnthropicClient:
             f"Analyze these product images for {brand} {product} authenticity:\n\n"
             f"{image_text}\n\n"
             f"For each image, provide findings as JSON array with objects containing: "
-            f"image_url, findings (array of {{type, description, confidence}}), overall_risk (0-1)."
+            f"image_url, findings (array of {{type, description, confidence}}), overall_risk (0-1).\n"
+            f"IMPORTANT: Return ONLY valid JSON, no additional text."
         )
 
         response = await self.analyze(system_prompt, user_prompt)
+
+        # Try to extract JSON from the response
         try:
             return json.loads(response)
         except json.JSONDecodeError:
-            return [
-                {
-                    "image_url": img.get("url", ""),
-                    "findings": [
-                        {
-                            "type": "analysis_error",
-                            "description": "Could not parse forensic analysis results",
-                            "confidence": 0.0,
-                        }
-                    ],
-                    "overall_risk": 0.5,
-                }
-                for img in image_descriptions
-            ]
+            # Attempt to find JSON array in the response
+            try:
+                start = response.index("[")
+                end = response.rindex("]") + 1
+                return json.loads(response[start:end])
+            except (ValueError, json.JSONDecodeError):
+                return [
+                    {
+                        "image_url": img.get("url", ""),
+                        "findings": [
+                            {
+                                "type": "analysis_error",
+                                "description": "Could not parse forensic analysis results",
+                                "confidence": 0.0,
+                            }
+                        ],
+                        "overall_risk": 0.5,
+                    }
+                    for img in image_descriptions
+                ]
 
     async def synthesize_verdict(
         self, brand: str, product: str, all_findings: dict
@@ -135,14 +178,14 @@ class AnthropicClient:
             suspicious_signals = factory_findings.get("suspicious_signals", 0)
             forensic_flags = forensics_findings.get("total_flags", 0)
 
-            # Weighted risk calculation
+            # Weighted risk calculation (scaled down to prevent hitting 100% ceiling)
             risk_score = min(
-                100.0,
-                (suspicious_listings * 12)
-                + (suspicious_buyers * 15)
-                + (suspicious_signals * 10)
-                + (forensic_flags * 8)
-                + random.uniform(5, 15),
+                98.0,
+                (suspicious_listings * 4)
+                + (suspicious_buyers * 5)
+                + (suspicious_signals * 4)
+                + (forensic_flags * 3)
+                + random.uniform(2, 8),
             )
             risk_score = round(risk_score, 1)
 
@@ -208,7 +251,7 @@ class AnthropicClient:
                 "recommended_action": recommended_action,
             }
 
-        # Real mode: send comprehensive analysis prompt to Claude
+        # Real mode: send comprehensive analysis prompt to Ollama
         system_prompt = (
             "You are the lead intelligence analyst for a counterfeit product investigation. "
             "Your role is to synthesize findings from multiple investigation agents and produce "
@@ -223,20 +266,29 @@ class AnthropicClient:
             f"**Supply Chain Analysis (Component Tracer):**\n{json.dumps(all_findings.get('component_tracer', {}), indent=2)}\n\n"
             f"**Employment Intelligence (Factory Spy):**\n{json.dumps(all_findings.get('factory_spy', {}), indent=2)}\n\n"
             f"**Forensic Analysis (Forensics Agent):**\n{json.dumps(all_findings.get('forensics', {}), indent=2)}\n\n"
-            f"Provide your verdict as a JSON object."
+            f"Provide your verdict as a JSON object.\n"
+            f"IMPORTANT: Return ONLY valid JSON, no additional text."
         )
 
         response = await self.analyze(system_prompt, user_prompt)
+
+        # Try to extract JSON from the response
         try:
             return json.loads(response)
         except json.JSONDecodeError:
-            return {
-                "risk_score": 50.0,
-                "verdict": response,
-                "evidence": [],
-                "recommended_action": "Investigate Further",
-            }
+            # Attempt to find JSON object in the response
+            try:
+                start = response.index("{")
+                end = response.rindex("}") + 1
+                return json.loads(response[start:end])
+            except (ValueError, json.JSONDecodeError):
+                return {
+                    "risk_score": 50.0,
+                    "verdict": response,
+                    "evidence": [],
+                    "recommended_action": "Investigate Further",
+                }
 
 
-# Singleton instance
-claude = AnthropicClient()
+# Singleton instance (same exported name 'llm' replaces 'claude')
+llm = OllamaClient()

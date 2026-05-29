@@ -18,6 +18,10 @@ from sse_starlette.sse import EventSourceResponse
 from models import InvestigationRequest
 from services.database import db
 from orchestrator import InvestigationOrchestrator, active_orchestrators
+from routes.scan_routes import scan_router
+from routes.fingerprint_routes import fingerprint_router
+from routes.supply_chain_routes import supply_chain_router
+from routes.forensics_routes import forensics_router
 
 app = FastAPI(title="Ghost Shift API")
 
@@ -28,6 +32,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register new module routers
+app.include_router(scan_router)
+app.include_router(fingerprint_router)
+app.include_router(supply_chain_router)
+app.include_router(forensics_router)
 
 
 @app.post("/api/investigate")

@@ -81,19 +81,24 @@ class BrightDataClient:
         # Real mode — Bright Data Web Scraper API
         import httpx
 
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "https://api.brightdata.com/datasets/v3/trigger",
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                json={
-                    "dataset_id": "marketplace_search",
-                    "query": f"{brand} {product}",
-                    "platforms": ["aliexpress", "dhgate", "taobao"],
-                },
-                timeout=60.0,
-            )
-            response.raise_for_status()
-            return response.json().get("results", [])
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "https://api.brightdata.com/datasets/v3/trigger",
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    json={
+                        "dataset_id": "marketplace_search",
+                        "query": f"{brand} {product}",
+                        "platforms": ["aliexpress", "dhgate", "taobao"],
+                    },
+                    timeout=60.0,
+                )
+                response.raise_for_status()
+                return response.json().get("results", [])
+        except Exception as e:
+            print(f"[WARN] Bright Data marketplace search failed: {e} — falling back to mock data")
+            self.mock_mode = True
+            return await self.search_marketplaces(brand, product)
 
     async def search_suppliers(
         self, brand: str, product: str, components: list[str]
@@ -148,19 +153,24 @@ class BrightDataClient:
 
         import httpx
 
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "https://api.brightdata.com/datasets/v3/trigger",
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                json={
-                    "dataset_id": "supplier_search",
-                    "query": f"{brand} {product} components",
-                    "components": components,
-                },
-                timeout=60.0,
-            )
-            response.raise_for_status()
-            return response.json().get("results", [])
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "https://api.brightdata.com/datasets/v3/trigger",
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    json={
+                        "dataset_id": "supplier_search",
+                        "query": f"{brand} {product} components",
+                        "components": components,
+                    },
+                    timeout=60.0,
+                )
+                response.raise_for_status()
+                return response.json().get("results", [])
+        except Exception as e:
+            print(f"[WARN] Bright Data supplier search failed: {e} — falling back to mock data")
+            self.mock_mode = True
+            return await self.search_suppliers(brand, product, components)
 
     async def search_job_postings(self, brand: str, product: str) -> list[dict]:
         """Search for suspicious job postings in manufacturing regions."""
@@ -250,19 +260,24 @@ class BrightDataClient:
 
         import httpx
 
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "https://api.brightdata.com/datasets/v3/trigger",
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                json={
-                    "dataset_id": "job_postings",
-                    "query": f"{brand} {product} manufacturing",
-                    "locations": ["Shenzhen", "Guangzhou", "Dongguan"],
-                },
-                timeout=60.0,
-            )
-            response.raise_for_status()
-            return response.json()
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "https://api.brightdata.com/datasets/v3/trigger",
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    json={
+                        "dataset_id": "job_postings",
+                        "query": f"{brand} {product} manufacturing",
+                        "locations": ["Shenzhen", "Guangzhou", "Dongguan"],
+                    },
+                    timeout=60.0,
+                )
+                response.raise_for_status()
+                return response.json()
+        except Exception as e:
+            print(f"[WARN] Bright Data job postings search failed: {e} — falling back to mock data")
+            self.mock_mode = True
+            return await self.search_job_postings(brand, product)
 
     async def get_product_images(self, brand: str, product: str) -> list[dict]:
         """Get product images from marketplace listings for forensic analysis."""
@@ -288,18 +303,23 @@ class BrightDataClient:
 
         import httpx
 
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "https://api.brightdata.com/datasets/v3/trigger",
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                json={
-                    "dataset_id": "product_images",
-                    "query": f"{brand} {product}",
-                },
-                timeout=60.0,
-            )
-            response.raise_for_status()
-            return response.json().get("images", [])
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "https://api.brightdata.com/datasets/v3/trigger",
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    json={
+                        "dataset_id": "product_images",
+                        "query": f"{brand} {product}",
+                    },
+                    timeout=60.0,
+                )
+                response.raise_for_status()
+                return response.json().get("images", [])
+        except Exception as e:
+            print(f"[WARN] Bright Data product images search failed: {e} — falling back to mock data")
+            self.mock_mode = True
+            return await self.get_product_images(brand, product)
 
 
 # Singleton instance

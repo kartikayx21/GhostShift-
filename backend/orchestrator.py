@@ -174,7 +174,7 @@ class InvestigationOrchestrator:
                             type=ev.get("type", "synthesis"),
                             description=ev.get("description", ""),
                             source_url=ev.get("source_url", ""),
-                            confidence=ev.get("confidence", 0.5),
+                            confidence=min(1.0, ev.get("confidence", 0.5) / 100.0 if ev.get("confidence", 0.5) > 1 else ev.get("confidence", 0.5)),
                         )
                     )
 

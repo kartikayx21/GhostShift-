@@ -1,6 +1,6 @@
 import asyncio
 from agents.base import BaseAgent
-from services.anthropic_client import claude
+from services.ollama_client import llm
 
 
 class JudgeAgent(BaseAgent):
@@ -32,7 +32,7 @@ class JudgeAgent(BaseAgent):
         await self.log(f"Analyzing {total_data_points} data points from 4 field agents...")
         await asyncio.sleep(0.5)
 
-        verdict = await claude.synthesize_verdict(brand, product, context)
+        verdict = await llm.synthesize_verdict(brand, product, context)
 
         risk_score = verdict.get("risk_score", 0)
         recommended_action = verdict.get("recommended_action", "Investigate Further")
