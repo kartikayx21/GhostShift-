@@ -5,6 +5,8 @@ import ProgressBar from '../components/ProgressBar'
 import AgentCard from '../components/AgentCard'
 import ActivityLog from '../components/ActivityLog'
 
+const API_BASE = import.meta.env.VITE_API_URL || ''
+
 // These match the backend agent names from database.py
 const AGENT_KEYS = ['hunter', 'component_tracer', 'factory_spy', 'forensics', 'judge']
 const AGENT_DISPLAY_NAMES = {
@@ -37,7 +39,7 @@ export default function Investigation() {
   // Fetch initial status
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch(`/api/investigate/${id}/status`)
+      const res = await fetch(`${API_BASE}/api/investigate/${id}/status`)
       if (!res.ok) return
 
       const data = await res.json()
@@ -80,7 +82,7 @@ export default function Investigation() {
     fetchStatus()
 
     // Connect to SSE stream
-    const eventSource = new EventSource(`/api/investigate/${id}/stream`)
+    const eventSource = new EventSource(`${API_BASE}/api/investigate/${id}/stream`)
     eventSourceRef.current = eventSource
 
     eventSource.addEventListener('log', (event) => {

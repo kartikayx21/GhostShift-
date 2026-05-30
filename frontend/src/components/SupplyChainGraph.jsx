@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
+const API_BASE = import.meta.env.VITE_API_URL || ''
+
 const NODE_COLORS = {
   green: { bg: '#22c55e', glow: 'rgba(34,197,94,0.3)', border: '#16a34a' },
   yellow: { bg: '#f59e0b', glow: 'rgba(245,158,11,0.3)', border: '#d97706' },
@@ -22,12 +24,12 @@ export default function SupplyChainGraph({ brand, product }) {
     async function fetchGraph() {
       try {
         const [graphRes, pathsRes] = await Promise.all([
-          fetch('/api/supply-chain/graph', {
+          fetch(`${API_BASE}/api/supply-chain/graph`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ brand, product }),
           }),
-          fetch('/api/supply-chain/suspicious-paths', {
+          fetch(`${API_BASE}/api/supply-chain/suspicious-paths`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ brand, product }),

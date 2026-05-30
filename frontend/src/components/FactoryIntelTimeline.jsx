@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
+const API_BASE = import.meta.env.VITE_API_URL || ''
+
 export default function FactoryIntelTimeline({ brand, product }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -8,7 +10,7 @@ export default function FactoryIntelTimeline({ brand, product }) {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch('/api/forensics/full-analysis', {
+        const res = await fetch(`${API_BASE}/api/forensics/full-analysis`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ brand, product }),

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
+const API_BASE = import.meta.env.VITE_API_URL || ''
+
 function getRiskBadge(score) {
   if (score == null) return { color: 'text-gray-500', bg: 'bg-gray-500/10', border: 'border-gray-500/20', label: '—' }
   if (score <= 40) return { color: 'text-risk-low', bg: 'bg-risk-low/10', border: 'border-risk-low/20', label: `${Math.round(score)}%` }
@@ -19,7 +21,7 @@ export default function Home() {
 
   // Fetch recent investigations
   useEffect(() => {
-    fetch('/api/investigations')
+    fetch(`${API_BASE}/api/investigations`)
       .then((res) => res.ok ? res.json() : Promise.reject('Failed to fetch'))
       .then((data) => setRecentInvestigations(Array.isArray(data) ? data : []))
       .catch(() => setRecentInvestigations([]))
@@ -33,7 +35,7 @@ export default function Home() {
     setError(null)
 
     try {
-      const res = await fetch('/api/investigate', {
+      const res = await fetch(`${API_BASE}/api/investigate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ brand: brand.trim(), product: product.trim() }),

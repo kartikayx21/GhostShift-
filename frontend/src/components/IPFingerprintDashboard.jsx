@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import ListingForensicsCard from './ListingForensicsCard'
 
+const API_BASE = import.meta.env.VITE_API_URL || ''
+
 export default function IPFingerprintDashboard({ brand, product }) {
   const [scanResult, setScanResult] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -17,12 +19,12 @@ export default function IPFingerprintDashboard({ brand, product }) {
     setLoading(true)
     try {
       const [fpRes, compareRes] = await Promise.all([
-        fetch('/api/fingerprint/extract', {
+        fetch(`${API_BASE}/api/fingerprint/extract`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ brand, product }),
         }),
-        fetch('/api/fingerprint/compare', {
+        fetch(`${API_BASE}/api/fingerprint/compare`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ brand, product }),

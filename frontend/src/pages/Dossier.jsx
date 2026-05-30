@@ -8,6 +8,8 @@ import GhostShiftReport from '../components/GhostShiftReport'
 import IPFingerprintDashboard from '../components/IPFingerprintDashboard'
 import FactoryIntelTimeline from '../components/FactoryIntelTimeline'
 
+const API_BASE = import.meta.env.VITE_API_URL || ''
+
 const ACTION_COLORS = {
   'Report': { color: '#ef4444', bg: 'bg-risk-high/10', border: 'border-risk-high/20', text: 'text-risk-high' },
   'Investigate Further': { color: '#f59e0b', bg: 'bg-risk-medium/10', border: 'border-risk-medium/20', text: 'text-risk-medium' },
@@ -24,8 +26,8 @@ export default function Dossier() {
     async function fetchResults() {
       try {
         const [resultsRes, statusRes] = await Promise.all([
-          fetch(`/api/investigate/${id}/results`),
-          fetch(`/api/investigate/${id}/status`),
+          fetch(`${API_BASE}/api/investigate/${id}/results`),
+          fetch(`${API_BASE}/api/investigate/${id}/status`),
         ])
 
         if (!resultsRes.ok) throw new Error('Investigation not found or not yet complete')
