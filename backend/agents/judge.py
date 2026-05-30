@@ -1,6 +1,6 @@
 import asyncio
 from agents.base import BaseAgent
-from services.ollama_client import llm
+from services.anthropic_client import llm
 
 
 class JudgeAgent(BaseAgent):

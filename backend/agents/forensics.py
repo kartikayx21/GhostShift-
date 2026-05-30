@@ -1,7 +1,7 @@
 import asyncio
 from agents.base import BaseAgent
 from services.brightdata import brightdata
-from services.ollama_client import llm
+from services.anthropic_client import llm
 
 
 class ForensicsAgent(BaseAgent):
