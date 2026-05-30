@@ -14,14 +14,46 @@ function getConfidenceColor(confidence) {
   return '#ef4444'
 }
 
-function truncateUrl(url, maxLength = 40) {
+function formatSourceLabel(url) {
   if (!url) return null
   try {
     const u = new URL(url)
-    const display = u.hostname + u.pathname
-    return display.length > maxLength ? display.slice(0, maxLength) + '...' : display
+    const hostname = u.hostname.replace('www.', '')
+    const path = u.pathname
+    // Build a readable reference like "AliExpress Item #3140897"
+    if (hostname.includes('aliexpress')) {
+      const match = path.match(/item\/(\d+)/)
+      return match ? `AliExpress Listing #${match[1]}` : `AliExpress Evidence`
+    }
+    if (hostname.includes('dhgate')) {
+      const match = path.match(/product\/(\d+)/)
+      return match ? `DHgate Listing #${match[1]}` : `DHgate Evidence`
+    }
+    if (hostname.includes('taobao')) {
+      const match = path.match(/item\/(\d+)/)
+      return match ? `Taobao Listing #${match[1]}` : `Taobao Evidence`
+    }
+    if (hostname.includes('1688')) {
+      const slug = path.split('/').filter(Boolean).pop()
+      return slug ? `1688.com — ${slug.replace(/-/g, ' ')}` : `1688.com Supplier Record`
+    }
+    if (hostname.includes('linkedin')) {
+      const slug = path.split('/').filter(Boolean).pop()
+      return slug ? `LinkedIn — ${slug.replace(/-/g, ' ')}` : `LinkedIn Profile`
+    }
+    if (hostname.includes('alibaba')) {
+      const slug = path.split('/').filter(Boolean).pop()
+      return slug ? `Alibaba — ${slug.replace(/-/g, ' ')}` : `Alibaba Supplier`
+    }
+    if (hostname.includes('zhaopin') || hostname.includes('51job') || hostname.includes('liepin')) {
+      const match = path.match(/job\/(\d+)/)
+      return match ? `${hostname} Job #${match[1]}` : `${hostname} Job Posting`
+    }
+    // Fallback: show hostname + truncated path
+    const display = hostname + path
+    return display.length > 45 ? display.slice(0, 45) + '…' : display
   } catch {
-    return url.length > maxLength ? url.slice(0, maxLength) + '...' : url
+    return url.length > 45 ? url.slice(0, 45) + '…' : url
   }
 }
 
@@ -30,6 +62,7 @@ export default function EvidenceCard({ evidence, index = 0 }) {
   const config = TYPE_CONFIG[type] || TYPE_CONFIG.listing
   const confColor = getConfidenceColor(confidence)
   const confPercent = Math.round((confidence || 0) * 100)
+  const sourceLabel = formatSourceLabel(source_url)
 
   return (
     <motion.div
@@ -74,20 +107,28 @@ export default function EvidenceCard({ evidence, index = 0 }) {
         </div>
       </div>
 
-      {/* Source Link */}
-      {source_url && (
-        <a
-          href={source_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs text-accent-glow/70 hover:text-accent-glow transition-colors truncate"
-        >
-          <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-          </svg>
-          <span className="truncate">{truncateUrl(source_url)}</span>
-        </a>
+      {/* Source Reference (non-clickable evidence tag) */}
+      {sourceLabel && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <div
+            className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg truncate"
+            style={{ backgroundColor: 'rgba(99, 102, 241, 0.08)', color: 'rgba(165, 180, 252, 0.8)', border: '1px solid rgba(99, 102, 241, 0.15)' }}
+            title={source_url}
+          >
+            <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            <span className="truncate">{sourceLabel}</span>
+          </div>
+          <span
+            className="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-widest"
+            style={{ backgroundColor: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.25)' }}
+          >
+            Simulated
+          </span>
+        </div>
       )}
     </motion.div>
   )
 }
+

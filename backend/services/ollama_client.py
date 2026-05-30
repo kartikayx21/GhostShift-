@@ -211,23 +211,59 @@ class OllamaClient:
                     f"Routine monitoring recommended."
                 )
 
+            # Extract real deep-link URLs from agent findings
+            listing_url = ""
+            suspicious_list = hunter_findings.get("suspicious_listings", [])
+            if suspicious_list:
+                first_listing = suspicious_list[0]
+                listing_url = first_listing.get("url", "")
+                # Build detailed listing descriptions with individual URLs
+                listing_details = []
+                for sl in suspicious_list[:5]:
+                    title = sl.get("title", "Unknown")
+                    platform = sl.get("platform", "Unknown")
+                    price = sl.get("price", 0)
+                    url = sl.get("url", "")
+                    listing_details.append(f"{title} (${price}) on {platform}")
+
+            supplier_url = ""
+            suppliers = component_findings.get("suppliers", [])
+            if suppliers:
+                # Find supplier with suspicious buyers
+                for sup in suppliers:
+                    buyers = sup.get("known_buyers", [])
+                    if any(b.get("suspicious") for b in buyers):
+                        supplier_url = sup.get("source_url", "")
+                        break
+                if not supplier_url:
+                    supplier_url = suppliers[0].get("source_url", "")
+
+            employment_url = ""
+            employee_data = factory_findings.get("employee_movements", [])
+            if employee_data:
+                employment_url = employee_data[0].get("linkedin_url", "")
+            if not employment_url:
+                job_data = factory_findings.get("job_postings", [])
+                if job_data:
+                    employment_url = job_data[0].get("source_url", "")
+
             evidence = [
                 {
                     "type": "listing",
                     "description": f"Found {suspicious_listings} suspicious marketplace listings with prices 40-78% below retail across AliExpress, DHgate, and Taobao",
-                    "source_url": "https://aliexpress.com",
+                    "source_url": listing_url,
                     "confidence": 0.87,
                 },
                 {
                     "type": "supplier",
                     "description": f"Identified {suspicious_buyers} suspicious entities purchasing identical components from {brand}'s verified suppliers",
-                    "source_url": "https://1688.com",
+                    "source_url": supplier_url,
                     "confidence": 0.78,
                 },
                 {
                     "type": "employment",
                     "description": f"Detected {suspicious_signals} employee movements from {brand} to suspected counterfeit manufacturers in Shenzhen/Guangzhou corridor",
-                    "source_url": "https://linkedin.com",
+                    "source_url": employment_url,
                     "confidence": 0.72,
                 },
                 {

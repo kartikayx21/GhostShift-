@@ -14,7 +14,7 @@ MOCK_SCENARIOS_DIR = Path(__file__).parent.parent / "data" / "mock_scenarios"
 def _load_scenario(name: str) -> dict:
     fpath = MOCK_SCENARIOS_DIR / name
     if fpath.exists():
-        with open(fpath) as f:
+        with open(fpath, encoding="utf-8") as f:
             return json.load(f)
     return {}
 
